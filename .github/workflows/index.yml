@@ -1,0 +1,49 @@
+name: Generate PoC Index
+
+on:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+  # Runs every day at 00:00 UTC
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  generate-index:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Index Repository
+        # Checks out the repository where this workflow file lives (your new PoC-in-GitHub-index repo)
+        uses: actions/checkout@v4
+        with:
+          path: 'PoC-in-GitHub-index'
+
+      - name: Clone PoC-in-GitHub Repository
+        # Clones the massive nomi-sec/PoC-in-GitHub repository
+        uses: actions/checkout@v4
+        with:
+          repository: nomi-sec/PoC-in-GitHub
+          path: 'PoC-in-GitHub'
+          # Fetch only the latest commit to save time
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Generate Index
+        # Runs the Python script from your index repository
+        run: python PoC-in-GitHub-index/generate_index.py
+
+      - name: Commit and Push changes
+        # Commits the newly created poc_index.json file
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "🤖 Update PoC index [skip ci]"
+          file_pattern: "poc_index.json"
+          # Ensure the action uses the correct committer details
+          commit_user_name: GitHub Actions Bot
+          commit_user_email: actions@github.com
+          commit_author: GitHub Actions Bot <actions@github.com>
+          # The repository path is the one where the script was run
+          repository: PoC-in-GitHub-index
