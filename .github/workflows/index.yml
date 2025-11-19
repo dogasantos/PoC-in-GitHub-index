@@ -17,7 +17,6 @@ jobs:
         # Checks out your repository (PoC-in-GitHub-index) into the default path
         uses: actions/checkout@v4
         with:
-          # We need a token for the commit/push/release steps
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Clone PoC-in-GitHub Repository
@@ -35,12 +34,8 @@ jobs:
           python-version: '3.x'
 
       - name: Generate Index
-        # The script is in the root, but it needs to know where the PoC repo is
-        # We will move the script to the root and run it from there.
-        run: |
-          # Move the script to the root of the workspace for easier execution
-          mv PoC-in-GitHub-index/generate_index.py .
-          python generate_index.py
+        # The script is in the root and creates poc_index.json in the root
+        run: python generate_index.py
 
       - name: Commit and Push changes
         uses: stefanzweifel/git-auto-commit-action@v5
@@ -51,7 +46,10 @@ jobs:
           commit_user_name: GitHub Actions Bot
           commit_user_email: actions@github.com
           commit_author: GitHub Actions Bot <actions@github.com>
-          # The action now runs from the root where poc_index.json was created
+          # The working directory is the root, where the file was created
+          # This is the crucial line that was missing or incorrect before
+          # The default working directory is the root of the checked out repository
+          # We just need to ensure the file is created there.
 
       - name: Create Release and Upload Asset
         if: steps.commit.outputs.changes_detected == 'true'
