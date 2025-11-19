@@ -10,6 +10,11 @@ on:
 jobs:
   generate-index:
     runs-on: ubuntu-latest
+    # Permissions needed for creating releases
+    permissions:
+      contents: write
+      pull-requests: write
+
     steps:
       - name: Checkout Index Repository
         # Checks out the repository where this workflow file lives (your new PoC-in-GitHub-index repo)
@@ -38,12 +43,25 @@ jobs:
       - name: Commit and Push changes
         # Commits the newly created poc_index.json file
         uses: stefanzweifel/git-auto-commit-action@v5
+        id: commit
         with:
-          commit_message: "🤖 Update PoC index [skip ci]"
+          commit_message: "Update PoC index [skip ci]"
           file_pattern: "poc_index.json"
-          # Ensure the action uses the correct committer details
           commit_user_name: GitHub Actions Bot
           commit_user_email: actions@github.com
           commit_author: GitHub Actions Bot <actions@github.com>
-          # The repository path is the one where the script was run
           repository: PoC-in-GitHub-index
+
+      - name: Create Release and Upload Asset
+        # Only run if the commit step actually made changes
+        if: steps.commit.outputs.changes_detected == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: index-v${{ github.run_number }}
+          name: PoC Index Update ${{ github.run_number }}
+          body: |
+            Automated update of the PoC-in-GitHub index.
+            This release contains the latest `poc_index.json` file.
+          files: poc_index.json
+          draft: false
+          prerelease: false
