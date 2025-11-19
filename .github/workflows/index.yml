@@ -1,35 +1,33 @@
 name: Generate PoC Index
 
 on:
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
-  # Runs every day at 00:00 UTC
   schedule:
     - cron: '0 0 * * *'
 
 jobs:
   generate-index:
     runs-on: ubuntu-latest
-    # Permissions needed for creating releases
     permissions:
       contents: write
       pull-requests: write
 
     steps:
       - name: Checkout Index Repository
-        # Checks out the repository where this workflow file lives (your new PoC-in-GitHub-index repo)
+        # Checks out your repository (PoC-in-GitHub-index) into the default path
         uses: actions/checkout@v4
         with:
-          path: 'PoC-in-GitHub-index'
+          # We need a token for the commit/push/release steps
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Clone PoC-in-GitHub Repository
-        # Clones the massive nomi-sec/PoC-in-GitHub repository
+        # Clones the target repository into a subdirectory
         uses: actions/checkout@v4
         with:
           repository: nomi-sec/PoC-in-GitHub
           path: 'PoC-in-GitHub'
-          # Fetch only the latest commit to save time
           fetch-depth: 1
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -37,23 +35,25 @@ jobs:
           python-version: '3.x'
 
       - name: Generate Index
-        # Runs the Python script from your index repository
-        run: python PoC-in-GitHub-index/generate_index.py
+        # The script is in the root, but it needs to know where the PoC repo is
+        # We will move the script to the root and run it from there.
+        run: |
+          # Move the script to the root of the workspace for easier execution
+          mv PoC-in-GitHub-index/generate_index.py .
+          python generate_index.py
 
       - name: Commit and Push changes
-        # Commits the newly created poc_index.json file
         uses: stefanzweifel/git-auto-commit-action@v5
         id: commit
         with:
-          commit_message: "Update PoC index [skip ci]"
+          commit_message: "🤖 Update PoC index [skip ci]"
           file_pattern: "poc_index.json"
           commit_user_name: GitHub Actions Bot
           commit_user_email: actions@github.com
           commit_author: GitHub Actions Bot <actions@github.com>
-          repository: PoC-in-GitHub-index
+          # The action now runs from the root where poc_index.json was created
 
       - name: Create Release and Upload Asset
-        # Only run if the commit step actually made changes
         if: steps.commit.outputs.changes_detected == 'true'
         uses: softprops/action-gh-release@v2
         with:
@@ -63,5 +63,3 @@ jobs:
             Automated update of the PoC-in-GitHub index.
             This release contains the latest `poc_index.json` file.
           files: poc_index.json
-          draft: false
-          prerelease: false
