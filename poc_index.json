@@ -5856,6 +5856,7 @@
   "CVE-2025-21293": "https://raw.githubusercontent.com/nomi-sec/PoC-in-GitHub/master/2025/CVE-2025-21293.json",
   "CVE-2025-32094": "https://raw.githubusercontent.com/nomi-sec/PoC-in-GitHub/master/2025/CVE-2025-32094.json",
   "CVE-2025-62470": "https://raw.githubusercontent.com/nomi-sec/PoC-in-GitHub/master/2025/CVE-2025-62470.json",
+  "CVE-2025-12674": "https://raw.githubusercontent.com/nomi-sec/PoC-in-GitHub/master/2025/CVE-2025-12674.json",
   "CVE-2025-24035": "https://raw.githubusercontent.com/nomi-sec/PoC-in-GitHub/master/2025/CVE-2025-24035.json",
   "CVE-2025-50360": "https://raw.githubusercontent.com/nomi-sec/PoC-in-GitHub/master/2025/CVE-2025-50360.json",
   "CVE-2025-3855": "https://raw.githubusercontent.com/nomi-sec/PoC-in-GitHub/master/2025/CVE-2025-3855.json",
